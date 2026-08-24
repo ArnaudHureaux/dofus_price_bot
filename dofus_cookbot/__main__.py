@@ -31,11 +31,11 @@ except ModuleNotFoundError as e:
     sys.exit(1)
 
 # Local/Application Specific Imports
-from gui.gui import create_window, ending_message
+from dofus_cookbot.gui.gui import create_window, ending_message
 
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
-pytesseract.pytesseract.tesseract_cmd = r'C:\\Users\\user\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'D:\tesseract\tesseract.exe'
 
 def do_click(x: int, y: int) -> None:
     """
@@ -50,10 +50,8 @@ def do_click(x: int, y: int) -> None:
     """
 
     try:
-        width, height = pyautogui.size()  # Get the screen resolution
-        x = int(x * width / 2560)  # Convert x coordinate to match screen resolution
-        y = int(y * height / 1440)  # Convert y coordinate to match screen resolution
-        
+        # Coordinates are already calibrated for the current screen resolution
+        # (native coordinates releved with utils/pos_finder/position_finder.py)
         delay = round(uniform(0, 1), 2)
         sleep(delay)  # sleep between 2 and 3 seconds
 
@@ -65,40 +63,60 @@ def do_click(x: int, y: int) -> None:
     except Exception as e:
         print(f"Error when clicking: {e}")
 
-def process_image(screenshot: Image.Image, item_name: str) -> str:
+def process_image(screenshot: Image.Image, item_name: str) -> dict:
     """
     purpose:
-        Process the screenshot of the item's price
+        Process the screenshot of the item's Lot/Prix panel and extract the
+        unit price, the price for 10 and the price for 100.
     input:
-        screenshot (Image): screenshot of the item's price
-        item_name (str): name of the item
+        screenshot (Image): screenshot of the Lot/Prix panel
+        item_name (str)   : name of the item
     output:
-        item_current_price (str): price of the item
+        dict: {'price': int, 'price_10': int, 'price_100': int}
     """
 
+    import re
+
+    def _to_int(digits: str) -> int:
+        digits = ''.join(filter(str.isdigit, digits))
+        return int(digits) if digits else 0
+
     try:
-        # Save the screenshot within img folder
-        timestamp = datetime.now()
-        timestamp = timestamp.strftime("%Y%m%d%H%M%S") 
+        # Preprocess: grayscale + upscale x3 greatly improves OCR accuracy
+        gray = screenshot.convert("L")
+        gray = gray.resize((gray.width * 3, gray.height * 3))
+        text = pytesseract.image_to_string(gray, config="--psm 6")
 
-        filename = f"{item_name}-{timestamp}.png"
-        screenshot.save(filename)
-        
-        # process the screenshot
-        item_img = Image.open(filename)
-        text = pytesseract.image_to_string(item_img)
-        try:
-            item_current_price = int(''.join(filter(str.isdigit, text)))
-        except:
-            item_current_price = 1
-        
-        # Delete the screenshot
-        os.remove(filename)
+        # The panel prints one row per lot, e.g.:
+        #   1 1777 ACHETER
+        #   10 17 888 ACHETER
+        #   100 179999 ACHETER
+        # We look for the lot number at the start of a row, then read the price.
+        prices = {1: 0, 10: 0, 100: 0}
+        for line in text.splitlines():
+            # keep only digits and spaces, collapse multiple spaces
+            cleaned = re.sub(r'[^\d ]', ' ', line)
+            cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+            if not cleaned:
+                continue
+            parts = cleaned.split(' ')
+            lot = _to_int(parts[0])
+            if lot in prices and len(parts) > 1:
+                price = _to_int(''.join(parts[1:]))
+                if price:
+                    prices[lot] = price
 
-        return item_current_price
-    
+        result = {
+            'price': prices[1] or 1,
+            'price_10': prices[10],
+            'price_100': prices[100],
+        }
+        return result
+
     except Exception as e:
         print(f"Error with OCR recognition: {e}")
+        return {'price': 1, 'price_10': 0, 'price_100': 0}
+
 
 def determine_price(item_name: str, item_quantity: int, item_type: str, item_lvl: int) -> dict:
     """
@@ -114,11 +132,11 @@ def determine_price(item_name: str, item_quantity: int, item_type: str, item_lvl
     """
 
     # click: clear research
-    do_click(753, 265)
+    do_click(881, 378)
     sleep(0.4)
 
     # click: searchbar
-    do_click(524, 265)
+    do_click(759, 379)
     sleep(0.2)
 
     # keyboard: write the item name in searchbar
@@ -126,24 +144,27 @@ def determine_price(item_name: str, item_quantity: int, item_type: str, item_lvl
     sleep(0.7)
 
     # click: first item to unwrap prices
-    do_click(845, 299)
+    do_click(1225, 451)
     sleep(1)
 
-    # take screenshot of average price
-    # x_top_left, y_top_left, x_bottom_right, y_bottom_right
-    width, height = pyautogui.size()
-    bbox = (
-        int(1220 * width / 2560),
-        int(350 * height / 1440),
-        int(1370 * width / 2560),
-        int(380 * height / 1440)
+    # Screenshot the whole Lot/Prix panel (left side of the screen).
+    # Coordinates calibrated with utils/pos_finder/region_selector.py.
+    # pyautogui is used (reliable) instead of pyscreenshot.
+    # region = (left, top, width, height)
+    panel = pyautogui.screenshot(region=(111, 259, 616 - 111, 627 - 259))
+    prices = process_image(panel, item_name)
+    item_current_price = prices['price']
+
+    print(
+        f"Prices found for {item_name}: "
+        f"x1={prices['price']} | x10={prices['price_10']} | x100={prices['price_100']} Kamas"
     )
-    screenshot = ImageGrab.grab(bbox=bbox)
-    item_current_price = process_image(screenshot, item_name)
 
-    print(f"Price found ! 1 x {item_name} for {item_current_price} Kamas")
-
-    return {'price': item_current_price}
+    return {
+        'price': prices['price'],
+        'price_10': prices['price_10'],
+        'price_100': prices['price_100'],
+    }
 
 def parse_recipe_from_json(json_data: list, item_name: str) -> list:
     """
@@ -186,7 +207,7 @@ def create_report(target: str, parsed_recipe: list) -> None:
     """
 
     table = PrettyTable()
-    table.field_names = [target, "Level", "Quantity", "Price", "Total Price"]
+    table.field_names = [target, "Level", "Quantity", "Price x1", "Price x10", "Price x100", "Total (x1)"]
     total_price_all_items = 0 
 
     try:
@@ -195,19 +216,21 @@ def create_report(target: str, parsed_recipe: list) -> None:
             item_lvl = resource['level']
             item_quantity = resource['quantity']
             item_price = resource['price']
+            item_price_10 = resource.get('price_10', 0)
+            item_price_100 = resource.get('price_100', 0)
 
             total_price = item_quantity * item_price
             total_price_all_items += total_price
 
-            table.add_row([item_name, item_lvl, item_quantity, item_price, total_price])
+            table.add_row([item_name, item_lvl, item_quantity, item_price, item_price_10, item_price_100, total_price])
 
         # Add 20% tax
         tax = round(total_price_all_items * 0.20)
         total_price_with_tax = total_price_all_items + tax
 
         # Print total price with tax
-        table.add_row(["-" * 10, "-" * 10, "-" * 10, "-" * 10, "-" * 10])
-        table.add_row(["Total Price (w/ taxes)", "", "", "", total_price_with_tax])
+        table.add_row(["-" * 10, "-" * 10, "-" * 10, "-" * 10, "-" * 10, "-" * 10, "-" * 10])
+        table.add_row(["Total Price (w/ taxes)", "", "", "", "", "", total_price_with_tax])
 
         print(table)
     

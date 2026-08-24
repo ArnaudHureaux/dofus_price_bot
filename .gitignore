@@ -1,7 +1,12 @@
 search.py
 __pycache__
 venv/
+.venv/
 test.py
 all_recipes_example.json
 dofus_cookbot.egg-info
 dist
+
+# Generated screenshots (calibration / OCR captures)
+capture_full.png
+capture_test.png

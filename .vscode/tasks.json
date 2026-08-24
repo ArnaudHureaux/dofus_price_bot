@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Dofus Price Bot",
+			"type": "shell",
+			"command": "${workspaceFolder}\\.venv\\Scripts\\python.exe -m dofus_cookbot",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "none",
+			"isBackground": true
+		}
+	]
+}
