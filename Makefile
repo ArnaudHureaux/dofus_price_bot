@@ -3,12 +3,14 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help run pos pick shot cap grab clean
+.PHONY: help run sync reco pos pick shot clean
 
 # help  : list available commands
 help:
 	@echo "Dofus Price Bot - commands"
 	@echo "  make run    -> launch the bot (GUI + autoclick + OCR)"
+	@echo "  make sync   -> full workflow: read sheet -> price -> write Cout column"
+	@echo "  make reco   -> fetch missing recipes from the sheet via DofusDB API"
 	@echo "  make pos    -> live mouse position finder"
 	@echo "  make pick   -> visual region selector (draw a box -> bbox + OCR)"
 	@echo "  make shot   -> full-screen capture (6s delay) into capture_full.png"
@@ -17,6 +19,14 @@ help:
 # run   : start the bot
 run:
 	$(PY) -m dofus_cookbot
+
+# sync  : full workflow (sheet -> HDV prices -> write Cout column)
+sync:
+	$(PY) -m dofus_cookbot --sync
+
+# reco  : fetch missing recipes from the sheet via DofusDB API
+reco:
+	$(PY) utils/api/fetch_recipes.py
 
 # pos   : live cursor position
 pos:

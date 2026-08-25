@@ -185190,86 +185190,6 @@
         "setId": 219
     },
     {
-        "_id": 12622,
-        "name": "Tacleur mineur",
-        "type": "Trophée",
-        "imgUrl": "https://s.ankama.com/www/static.ankama.com/dofus/www/game/items/200/151079.png",
-        "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/12622-tacleur-mineur",
-        "description": "Ce Trophée permet de garder les pleutres à proximité. Pour mieux les piétiner.",
-        "lvl": "50",
-        "stats": [
-            {
-                "Tacle": {
-                    "from": "4"
-                }
-            }
-        ],
-        "condition": [],
-        "recipe": [
-            {
-                "Fragment de Pierre Polie": {
-                    "id": "2304",
-                    "url": "https://www.dofus-touch.com/fr/mmorpg/encyclopedie/ressources/2304-fragment-pierre-polie",
-                    "imgUrl": "https://s.ankama.com/www/static.ankama.com/dofus/www/game/items/52/51454.w48h48.png",
-                    "type": "Pierre brute",
-                    "lvl": "65",
-                    "quantity": "1"
-                }
-            },
-            {
-                "Pic de Dragodinde": {
-                    "id": "2599",
-                    "url": "https://www.dofus-touch.com/fr/mmorpg/encyclopedie/ressources/2599-pic-dragodinde",
-                    "imgUrl": "https://s.ankama.com/www/static.ankama.com/dofus/www/game/items/52/47597.w48h48.png",
-                    "type": "Os",
-                    "lvl": "61",
-                    "quantity": "3"
-                }
-            },
-            {
-                "Rutile": {
-                    "id": "7036",
-                    "url": "https://www.dofus-touch.com/fr/mmorpg/encyclopedie/ressources/7036-rutile",
-                    "imgUrl": "https://s.ankama.com/www/static.ankama.com/dofus/www/game/items/52/40707.w48h48.png",
-                    "type": "Alliage",
-                    "lvl": "160",
-                    "quantity": "1"
-                }
-            },
-            {
-                "Fragment de cerveau poli": {
-                    "id": "8762",
-                    "url": "https://www.dofus-touch.com/fr/mmorpg/encyclopedie/ressources/8762-fragment-cerveau-poli",
-                    "imgUrl": "https://s.ankama.com/www/static.ankama.com/dofus/www/game/items/52/50003.w48h48.png",
-                    "type": "Pierre précieuse",
-                    "lvl": "102",
-                    "quantity": "1"
-                }
-            },
-            {
-                "Galet cramoisi": {
-                    "id": "12737",
-                    "url": "https://www.dofus-touch.com/fr/mmorpg/encyclopedie/ressources/12737-galet-cramoisi",
-                    "imgUrl": "https://s.ankama.com/www/static.ankama.com/dofus/www/game/items/52/15290.w48h48.png",
-                    "type": "Galet",
-                    "lvl": "50",
-                    "quantity": "2"
-                }
-            },
-            {
-                "Substrat de Bocage": {
-                    "id": "12745",
-                    "url": "https://www.dofus-touch.com/fr/mmorpg/encyclopedie/ressources/12745-substrat-bocage",
-                    "imgUrl": "https://s.ankama.com/www/static.ankama.com/dofus/www/game/items/52/12729.w48h48.png",
-                    "type": "Substrat",
-                    "lvl": "40",
-                    "quantity": "1"
-                }
-            }
-        ],
-        "setId": 0
-    },
-    {
         "_id": 12707,
         "name": "Soigneur mineur",
         "type": "Trophée",
@@ -251779,5 +251699,239 @@
         "condition": [],
         "recipe": [],
         "setId": 0
+    },
+    {
+        "_id": 153,
+        "name": "Pelle de Boisaille",
+        "type": "Pelle",
+        "lvl": "6",
+        "recipe": [
+            {
+                "Peau de Gloot": {
+                    "id": "16522",
+                    "lvl": "2",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Bois de Frêne": {
+                    "id": "303",
+                    "lvl": "1",
+                    "quantity": "3"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 9961,
+        "name": "Marteau Martel",
+        "type": "Marteau",
+        "lvl": "1",
+        "recipe": [
+            {
+                "Pétale Diaphane": {
+                    "id": "16513",
+                    "lvl": "2",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Bois de Frêne": {
+                    "id": "303",
+                    "lvl": "1",
+                    "quantity": "3"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 2539,
+        "name": "Substrat de Buisson",
+        "type": "Substrat",
+        "lvl": "20",
+        "recipe": [
+            {
+                "Potion de Souvenir": {
+                    "id": "7652",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Planche Contreplaquée": {
+                    "id": "16490",
+                    "lvl": "20",
+                    "quantity": "1"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 12745,
+        "name": "Substrat de Bocage",
+        "type": "Substrat",
+        "lvl": "40",
+        "recipe": [
+            {
+                "Potion de Souvenir": {
+                    "id": "7652",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Planche à Griller": {
+                    "id": "16491",
+                    "lvl": "40",
+                    "quantity": "1"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 2540,
+        "name": "Substrat de Futaie",
+        "type": "Substrat",
+        "lvl": "60",
+        "recipe": [
+            {
+                "Potion de Souvenir": {
+                    "id": "7652",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Planche de Surf": {
+                    "id": "16492",
+                    "lvl": "60",
+                    "quantity": "1"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 7652,
+        "name": "Potion de Souvenir",
+        "type": "Préparation",
+        "lvl": "30",
+        "recipe": [
+            {
+                "Sauge": {
+                    "id": "428",
+                    "lvl": "20",
+                    "quantity": "10"
+                }
+            },
+            {
+                "Ortie": {
+                    "id": "421",
+                    "lvl": "1",
+                    "quantity": "20"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 140,
+        "name": "Bâton de Boisaille",
+        "type": "Bâton",
+        "lvl": "9",
+        "recipe": [
+            {
+                "Feu Intérieur": {
+                    "id": "16518",
+                    "lvl": "1",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Os de Chafer": {
+                    "id": "310",
+                    "lvl": "5",
+                    "quantity": "3"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 44,
+        "name": "Épée de Boisaille",
+        "type": "Épée",
+        "lvl": "7",
+        "recipe": [
+            {
+                "Plume Chimérique": {
+                    "id": "16512",
+                    "lvl": "1",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Bois de Frêne": {
+                    "id": "303",
+                    "lvl": "1",
+                    "quantity": "3"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 97,
+        "name": "Dagues de Boisaille",
+        "type": "Dague",
+        "lvl": "7",
+        "recipe": [
+            {
+                "Relique d'Incarnam": {
+                    "id": "16524",
+                    "lvl": "5",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Queue de Chapardam": {
+                    "id": "16515",
+                    "lvl": "4",
+                    "quantity": "3"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 333,
+        "name": "Baguette Deuh-Pain",
+        "type": "Baguette",
+        "lvl": "50",
+        "recipe": [
+            {
+                "Lamelle de Champa Marron": {
+                    "id": "16166",
+                    "lvl": "39",
+                    "quantity": "6"
+                }
+            },
+            {
+                "Cuir du Cochon de Lait": {
+                    "id": "901",
+                    "lvl": "33",
+                    "quantity": "6"
+                }
+            },
+            {
+                "Patte de Kankreblath": {
+                    "id": "16002",
+                    "lvl": "40",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Magnésite": {
+                    "id": "748",
+                    "lvl": "60",
+                    "quantity": "1"
+                }
+            }
+        ]
     }
 ]

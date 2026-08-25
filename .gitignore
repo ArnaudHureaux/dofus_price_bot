@@ -8,5 +8,8 @@ dofus_cookbot.egg-info
 dist
 
 # Generated screenshots (calibration / OCR captures)
-capture_full.png
-capture_test.png
+capture_*.png
+
+# Google API secrets - NEVER commit these
+credentials.json
+token.json

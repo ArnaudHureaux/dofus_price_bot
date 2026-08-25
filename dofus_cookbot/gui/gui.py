@@ -45,6 +45,7 @@ def get_item_names(recipe_file_path: str) -> list[str]:
 
 def create_window():
     item_requested = list()
+    action = {"sync": False}
     root = Tk()
     root.title("Dofus Cooker")
     root.geometry("600x600")
@@ -57,6 +58,10 @@ def create_window():
             messagebox.showinfo("No item selected", "Please select at least one item")
         else:
             root.destroy()
+
+    def on_sync_button_click():
+        action["sync"] = True
+        root.destroy()
     
     def on_add_button_click():
         item_requested.append(my_entry.get())
@@ -117,6 +122,9 @@ def create_window():
     ok_button = ttk.Button(root, text="OK", command=on_ok_button_click)
     ok_button.pack(pady=20)
 
+    sync_button = ttk.Button(root, text="SYNC SHEET", command=on_sync_button_click)
+    sync_button.pack(padx=20)
+
     delete_button = ttk.Button(root, text="DELETE", command=on_delete_button_click)
     delete_button.pack(padx=20, side=BOTTOM)
 
@@ -139,7 +147,9 @@ def create_window():
         print(f"Error in GUI display: {e}")
 
     root.mainloop()
-    
+
+    if action["sync"]:
+        return "__SYNC__"
     return item_requested
 
 def ending_message():
