@@ -421,6 +421,7 @@ def update_dashboard() -> int:
             meta[name] = {
                 "metier": str(r.get(COL_METIER, "")).strip(),
                 "niveau": r.get(COL_NIVEAU, ""),
+                "recette": str(r.get(COL_RECIPE, "")).strip(),
                 "volume": _to_num(r.get(COL_VOLUME)),
                 "prod_share": _to_float(r.get(COL_PROD_SHARE)),
             }

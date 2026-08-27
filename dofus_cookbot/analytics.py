@@ -25,7 +25,7 @@ STATS_HEADER = [
 ]
 
 DASHBOARD_HEADER = [
-    "Rang", "Nom de l'item", "Métier", "Niveau", "Prix", "Coût", "Rdt %",
+    "Rang", "Nom de l'item", "Métier", "Niveau", "Recette", "Prix", "Coût", "Rdt %",
     "Palier", "Prod. conseillée", "Invest. (kama)",
     "Coût max S", "Coût max A", "Coût max B", "Coût max C",
     "Marge coût (→A)", "Score", "Profit/kama %",
@@ -190,6 +190,7 @@ def _dashboard_row(rank: int, s: dict, meta: dict) -> list:
     invest = round(cost * prod) if (prod and cost) else ""
     return [
         rank, s["name"], meta.get("metier", ""), meta.get("niveau", ""),
+        meta.get("recette", ""),
         _num(sell), _num(cost), _pct(s["mrate_last"]), tier_for(sell, cost),
         prod, invest,
         _num(ceils.get("S")), _num(ceils.get("A")),
