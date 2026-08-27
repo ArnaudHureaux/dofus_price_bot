@@ -10,9 +10,8 @@ from datetime import date, timedelta
 # --- Tunable knobs -------------------------------------------------------
 WINDOW_DAYS = 7           # rolling window for the 7d stats
 MIN_RETURN = 1.00         # target return that defines "Coût max" (100%)
-# Share of the 30d sales volume you aim to supply yourself (avoid flooding).
-# Prudent default with no sell-through data yet; raise it on items that sell
-# out fast at your target price.
+# Fallback share of the 30d sales volume when the item has no per-item value.
+# Per-item override lives in the Item sheet's "Prod Share" column.
 PROD_SHARE = 0.10
 # Tiers: (label, minimum return). Cost ceiling = sell / (1 + return).
 TIERS = [("S", 1.50), ("A", 1.00), ("B", 0.50), ("C", 0.25)]
@@ -27,7 +26,7 @@ STATS_HEADER = [
 
 DASHBOARD_HEADER = [
     "Rang", "Nom de l'item", "Métier", "Niveau", "Prix", "Coût", "Rdt %",
-    "Palier", "Volume 30j", "Prod. conseillée", "Invest. (kama)",
+    "Palier", "Prod. conseillée", "Invest. (kama)",
     "Coût max S", "Coût max A", "Coût max B", "Coût max C",
     "Marge coût (→A)", "Score", "Profit/kama %",
 ]
@@ -184,12 +183,15 @@ def _dashboard_row(rank: int, s: dict, meta: dict) -> list:
     cost_a = ceils.get("A")
     headroom = (cost_a - cost) if (cost_a is not None and cost is not None) else None
     volume = meta.get("volume")
-    prod = round(volume * PROD_SHARE) if volume else ""
+    share = meta.get("prod_share")
+    if share is None:
+        share = PROD_SHARE
+    prod = round(volume * share) if volume else ""
     invest = round(cost * prod) if (prod and cost) else ""
     return [
         rank, s["name"], meta.get("metier", ""), meta.get("niveau", ""),
         _num(sell), _num(cost), _pct(s["mrate_last"]), tier_for(sell, cost),
-        volume if volume is not None else "", prod, invest,
+        prod, invest,
         _num(ceils.get("S")), _num(ceils.get("A")),
         _num(ceils.get("B")), _num(ceils.get("C")),
         _num(headroom), s["score"], _pct(s["mrate_last"]),

@@ -45,6 +45,7 @@ COL_TO_SCRAPE = "To_scrape"
 COL_METIER = "Métier"
 COL_NIVEAU = "Niveau Métier"
 COL_VOLUME = "Volume"
+COL_PROD_SHARE = "Prod Share"
 
 # History tab: one row per (item, day), snapshotting Prix/Coût + derived margin
 HISTORY_TITLE = "Historic"
@@ -289,6 +290,19 @@ def _to_num(v):
     return int(s) if s and s != "-" else None
 
 
+def _to_float(v):
+    """Parse a sheet cell into a float, tolerating the French comma, or None."""
+    if v is None or v == "":
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    s = str(v).strip().replace(" ", "").replace(",", ".")
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
 def snapshot_history() -> int:
     """
     purpose:
@@ -398,15 +412,17 @@ def update_dashboard() -> int:
     from dofus_cookbot.analytics import build_tables
 
     ss = _get_client().open_by_key(SPREADSHEET_ID)
-    # Item metadata (job / level / 30d sales volume) to enrich the Dashboard
+    # Item metadata (job / level / 30d sales volume / prod share) to enrich the
+    # Dashboard. Read UNFORMATTED so locale decimals (0,1) parse correctly.
     meta = {}
-    for r in ss.sheet1.get_all_records():
+    for r in ss.sheet1.get_all_records(value_render_option="UNFORMATTED_VALUE"):
         name = str(r.get(COL_ITEM, "")).strip()
         if name:
             meta[name] = {
                 "metier": str(r.get(COL_METIER, "")).strip(),
                 "niveau": r.get(COL_NIVEAU, ""),
                 "volume": _to_num(r.get(COL_VOLUME)),
+                "prod_share": _to_float(r.get(COL_PROD_SHARE)),
             }
 
     history = read_history()
