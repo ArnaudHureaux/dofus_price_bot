@@ -25,7 +25,7 @@ STATS_HEADER = [
 
 DASHBOARD_HEADER = [
     "Rang", "Nom de l'item", "Métier", "Niveau", "Prix", "Coût", "Rdt %",
-    "Palier", "Volume 30j", "Prod. conseillée",
+    "Palier", "Volume 30j", "Prod. conseillée", "Invest. (kama)",
     "Coût max S", "Coût max A", "Coût max B", "Coût max C",
     "Marge coût (→A)", "Score", "Profit/kama %",
 ]
@@ -183,10 +183,11 @@ def _dashboard_row(rank: int, s: dict, meta: dict) -> list:
     headroom = (cost_a - cost) if (cost_a is not None and cost is not None) else None
     volume = meta.get("volume")
     prod = round(volume * PROD_SHARE) if volume else ""
+    invest = round(cost * prod) if (prod and cost) else ""
     return [
         rank, s["name"], meta.get("metier", ""), meta.get("niveau", ""),
         _num(sell), _num(cost), _pct(s["mrate_last"]), tier_for(sell, cost),
-        volume if volume is not None else "", prod,
+        volume if volume is not None else "", prod, invest,
         _num(ceils.get("S")), _num(ceils.get("A")),
         _num(ceils.get("B")), _num(ceils.get("C")),
         _num(headroom), s["score"], _pct(s["mrate_last"]),
