@@ -11,7 +11,9 @@ from datetime import date, timedelta
 WINDOW_DAYS = 7           # rolling window for the 7d stats
 MIN_RETURN = 1.00         # target return that defines "Coût max" (100%)
 # Share of the 30d sales volume you aim to supply yourself (avoid flooding).
-PROD_SHARE = 0.50
+# Prudent default with no sell-through data yet; raise it on items that sell
+# out fast at your target price.
+PROD_SHARE = 0.10
 # Tiers: (label, minimum return). Cost ceiling = sell / (1 + return).
 TIERS = [("S", 1.50), ("A", 1.00), ("B", 0.50), ("C", 0.25)]
 
