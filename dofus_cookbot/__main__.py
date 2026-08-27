@@ -556,7 +556,12 @@ def run_sync_hdv(hdv: str):
     input:
         hdv (str): "resource" | "equipment" | "consumable"
     """
-    from utils.gsheet.gsheet import get_item_names, update_costs, update_prices
+    from utils.gsheet.gsheet import (
+        get_item_names,
+        snapshot_history,
+        update_costs,
+        update_prices,
+    )
 
     data = _load_recipes_data()
     items = get_item_names()
@@ -608,6 +613,13 @@ def run_sync_hdv(hdv: str):
     if costs:
         n = update_costs(costs, recipes)
         print(f"{n} cost(s) written to the 'Coût' column.")
+
+    # Daily history snapshot (one row per item/day in the 'Historic' tab)
+    try:
+        n = snapshot_history()
+        print(f"{n} ligne(s) d'historique (onglet Historic).")
+    except Exception as e:
+        print(f"[historique] non ecrit: {e}")
 
 
 def main():

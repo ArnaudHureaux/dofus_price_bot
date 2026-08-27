@@ -19,6 +19,7 @@
 import csv
 import io
 import os
+import re
 import urllib.request
 from datetime import datetime
 
@@ -40,6 +41,10 @@ COL_DATE = "Date Coût"
 COL_RECIPE = "Recette"
 COL_PRICE = "Prix"
 COL_PRICE_DATE = "Date Prix"
+
+# History tab: one row per (item, day), snapshotting Prix/Coût + derived margin
+HISTORY_TITLE = "Historic"
+HISTORY_HEADER = ["Date", COL_ITEM, COL_PRICE, COL_COST, "Marge", "Marge %"]
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 CREDENTIALS_PATH = os.path.join(_HERE, "credentials.json")
@@ -258,6 +263,88 @@ def update_prices(prices: dict[str, int]) -> int:
         ws.batch_update(updates)
 
     return updated
+
+
+def _to_num(v):
+    """Parse a sheet cell (int, float or '4 278') into an int, or None."""
+    if v is None or v == "":
+        return None
+    if isinstance(v, (int, float)):
+        return int(v)
+    s = re.sub(r"[^\d-]", "", str(v))
+    return int(s) if s and s != "-" else None
+
+
+def snapshot_history() -> int:
+    """
+    purpose:
+        Upsert one row per item into the "Historic" tab for today's date,
+        snapshotting the main sheet's current Prix/Coût (+ derived Marge).
+        Same (item, day) -> update the row; a new day -> append.
+    output:
+        int: number of rows written (updated + appended).
+    """
+    client = _get_client()
+    ss = client.open_by_key(SPREADSHEET_ID)
+    records = ss.sheet1.get_all_records()
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    try:
+        ws = ss.worksheet(HISTORY_TITLE)
+    except gspread.WorksheetNotFound:
+        ws = ss.add_worksheet(title=HISTORY_TITLE, rows=2000, cols=len(HISTORY_HEADER))
+
+    values = ws.get_all_values()
+    if not values or values[0][: len(HISTORY_HEADER)] != HISTORY_HEADER:
+        ws.update("A1", [HISTORY_HEADER])
+        values = [HISTORY_HEADER]
+
+    # Index existing rows by (name, date)
+    existing = {}
+    for r, row in enumerate(values[1:], start=2):
+        if len(row) >= 2:
+            existing[(row[1].strip(), row[0].strip())] = r
+
+    updates, appends = [], []
+    for rec in records:
+        name = str(rec.get(COL_ITEM, "")).strip()
+        if not name:
+            continue
+        prix = _to_num(rec.get(COL_PRICE))
+        cout = _to_num(rec.get(COL_COST))
+        if prix is None and cout is None:
+            continue
+        marge = prix - cout if (prix is not None and cout is not None) else ""
+        marge_pct = (
+            round((prix - cout) / cout * 100, 1)
+            if (prix is not None and cout)
+            else ""
+        )
+        row = [
+            today,
+            name,
+            prix if prix is not None else "",
+            cout if cout is not None else "",
+            marge,
+            marge_pct,
+        ]
+        key = (name, today)
+        if key in existing:
+            r = existing[key]
+            rng = (
+                f"{gspread.utils.rowcol_to_a1(r, 1)}:"
+                f"{gspread.utils.rowcol_to_a1(r, len(HISTORY_HEADER))}"
+            )
+            updates.append({"range": rng, "values": [row]})
+        else:
+            appends.append(row)
+
+    if updates:
+        ws.batch_update(updates)
+    if appends:
+        ws.append_rows(appends, value_input_option="USER_ENTERED")
+
+    return len(updates) + len(appends)
 
 
 if __name__ == "__main__":
