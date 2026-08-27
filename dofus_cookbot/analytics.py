@@ -10,6 +10,8 @@ from datetime import date, timedelta
 # --- Tunable knobs -------------------------------------------------------
 WINDOW_DAYS = 7           # rolling window for the 7d stats
 MIN_RETURN = 1.00         # target return that defines "Coût max" (100%)
+# Share of the 30d sales volume you aim to supply yourself (avoid flooding).
+PROD_SHARE = 0.50
 # Tiers: (label, minimum return). Cost ceiling = sell / (1 + return).
 TIERS = [("S", 1.50), ("A", 1.00), ("B", 0.50), ("C", 0.25)]
 
@@ -22,7 +24,8 @@ STATS_HEADER = [
 ]
 
 DASHBOARD_HEADER = [
-    "Rang", "Nom de l'item", "Prix", "Coût", "Rdt %", "Palier",
+    "Rang", "Nom de l'item", "Métier", "Niveau", "Prix", "Coût", "Rdt %",
+    "Palier", "Volume 30j", "Prod. conseillée",
     "Coût max S", "Coût max A", "Coût max B", "Coût max C",
     "Marge coût (→A)", "Score", "Profit/kama %",
 ]
@@ -173,27 +176,32 @@ def _stats_row(s: dict) -> list:
     ]
 
 
-def _dashboard_row(rank: int, s: dict) -> list:
+def _dashboard_row(rank: int, s: dict, meta: dict) -> list:
     sell, cost = s["sell_last"], s["cost_last"]
     ceils = {label: cost_ceiling(sell, r) for label, r in TIERS}
     cost_a = ceils.get("A")
     headroom = (cost_a - cost) if (cost_a is not None and cost is not None) else None
+    volume = meta.get("volume")
+    prod = round(volume * PROD_SHARE) if volume else ""
     return [
-        rank, s["name"], _num(sell), _num(cost), _pct(s["mrate_last"]),
-        tier_for(sell, cost),
+        rank, s["name"], meta.get("metier", ""), meta.get("niveau", ""),
+        _num(sell), _num(cost), _pct(s["mrate_last"]), tier_for(sell, cost),
+        volume if volume is not None else "", prod,
         _num(ceils.get("S")), _num(ceils.get("A")),
         _num(ceils.get("B")), _num(ceils.get("C")),
         _num(headroom), s["score"], _pct(s["mrate_last"]),
     ]
 
 
-def build_tables(history_rows: list, today: date = None):
+def build_tables(history_rows: list, meta: dict = None, today: date = None):
     """
     Group history by item, compute stats + scores, and return
     (STATS_HEADER, stats_rows, DASHBOARD_HEADER, dashboard_rows).
+    meta: optional {name: {'metier','niveau','volume'}} from the Item sheet.
     Dashboard is ranked by score (desc).
     """
     today = today or date.today()
+    meta = meta or {}
 
     by_item = {}
     for r in history_rows:
@@ -207,6 +215,9 @@ def build_tables(history_rows: list, today: date = None):
     stats_rows = [_stats_row(s) for s in sorted(stats, key=lambda s: s["name"])]
 
     ranked = sorted(stats, key=lambda s: s["score"], reverse=True)
-    dashboard_rows = [_dashboard_row(i, s) for i, s in enumerate(ranked, start=1)]
+    dashboard_rows = [
+        _dashboard_row(i, s, meta.get(s["name"], {}))
+        for i, s in enumerate(ranked, start=1)
+    ]
 
     return STATS_HEADER, stats_rows, DASHBOARD_HEADER, dashboard_rows

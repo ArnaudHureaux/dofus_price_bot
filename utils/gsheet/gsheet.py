@@ -42,6 +42,9 @@ COL_RECIPE = "Recette"
 COL_PRICE = "Prix"
 COL_PRICE_DATE = "Date Prix"
 COL_TO_SCRAPE = "To_scrape"
+COL_METIER = "Métier"
+COL_NIVEAU = "Niveau Métier"
+COL_VOLUME = "Volume"
 
 # History tab: one row per (item, day), snapshotting Prix/Coût + derived margin
 HISTORY_TITLE = "Historic"
@@ -394,8 +397,20 @@ def update_dashboard() -> int:
     """Recompute Stats + Dashboard from the Historic tab. Returns item count."""
     from dofus_cookbot.analytics import build_tables
 
+    ss = _get_client().open_by_key(SPREADSHEET_ID)
+    # Item metadata (job / level / 30d sales volume) to enrich the Dashboard
+    meta = {}
+    for r in ss.sheet1.get_all_records():
+        name = str(r.get(COL_ITEM, "")).strip()
+        if name:
+            meta[name] = {
+                "metier": str(r.get(COL_METIER, "")).strip(),
+                "niveau": r.get(COL_NIVEAU, ""),
+                "volume": _to_num(r.get(COL_VOLUME)),
+            }
+
     history = read_history()
-    stats_header, stats_rows, dash_header, dash_rows = build_tables(history)
+    stats_header, stats_rows, dash_header, dash_rows = build_tables(history, meta=meta)
     _write_table("Stats", stats_header, stats_rows)
     _write_table("Dashboard", dash_header, dash_rows)
     return len(dash_rows)
