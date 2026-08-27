@@ -106,15 +106,20 @@ def get_recipe(item_id: int) -> dict | None:
 
 
 def resolve_items(ids: list[int]) -> dict[int, dict]:
-    """Resolve a list of item ids into {id: {'name':..., 'level':...}}."""
+    """Resolve a list of item ids into {id: {'name':..., 'level':..., 'type':...}}."""
     out = {}
     for iid in ids:
         r = requests.get(f"{API}/items/{iid}", headers=HEADERS, params={"lang": "fr"})
         if r.status_code == 200:
             d = r.json()
+            t = d.get("type")
+            type_name = ""
+            if isinstance(t, dict) and isinstance(t.get("name"), dict):
+                type_name = t["name"].get("fr", "")
             out[iid] = {
                 "name": d.get("name", {}).get("fr", str(iid)),
                 "level": d.get("level", 0),
+                "type": type_name,
             }
         time.sleep(0.05)
     return out
@@ -136,11 +141,12 @@ def build_entry(name: str) -> dict | None:
     ing = resolve_items(recipe["ingredientIds"])
     recipe_list = []
     for iid, qty in zip(recipe["ingredientIds"], recipe["quantities"]):
-        info = ing.get(iid, {"name": str(iid), "level": 0})
+        info = ing.get(iid, {"name": str(iid), "level": 0, "type": ""})
         recipe_list.append(
             {
                 info["name"]: {
                     "id": str(iid),
+                    "type": info.get("type", ""),
                     "lvl": str(info["level"]),
                     "quantity": str(qty),
                 }
@@ -164,6 +170,12 @@ def build_entry(name: str) -> dict | None:
 
 
 def main(names: list[str]) -> None:
+    # --refresh: re-fetch and OVERWRITE recipes that are already in the JSON
+    # (the bundled data came from Dofus Touch and has wrong recipes).
+    names = list(names)
+    refresh = "--refresh" in names
+    names = [n for n in names if n != "--refresh"]
+
     if not names:
         from utils.gsheet.gsheet import get_item_names_public
 
@@ -171,29 +183,41 @@ def main(names: list[str]) -> None:
 
     with open(RECIPES_PATH, encoding="utf-8") as f:
         data = json.loads(f.read())
-    existing_names = {d["name"] for d in data}
-    existing_ids = {d.get("_id") for d in data}
+    by_name = {d["name"]: i for i, d in enumerate(data)}
+    by_id = {d.get("_id"): i for i, d in enumerate(data)}
 
-    added = 0
+    added = updated = 0
     for name in names:
-        if name in existing_names:
+        if name in by_name and not refresh:
             print(f"  [-] deja present: {name}")
             continue
         entry = build_entry(name)
-        if entry:
-            # Dedup by canonical id (sheet name may differ from DofusDB name)
-            if entry["_id"] in existing_ids or entry["name"] in existing_names:
-                print(f"  [-] deja present (canon): {entry['name']}")
-                continue
-            data.append(entry)
-            existing_names.add(entry["name"])
-            existing_ids.add(entry["_id"])
-            added += 1
+        if not entry:
+            continue
 
-    if added:
+        # Locate an existing entry to replace (canonical id, then name)
+        idx = by_id.get(entry["_id"])
+        if idx is None:
+            idx = by_name.get(entry["name"], by_name.get(name))
+
+        if idx is not None:
+            if refresh:
+                data[idx] = entry
+                updated += 1
+                print(f"  [~] mis a jour: {entry['name']}")
+            else:
+                print(f"  [-] deja present (canon): {entry['name']}")
+            continue
+
+        data.append(entry)
+        by_name[entry["name"]] = len(data) - 1
+        by_id[entry["_id"]] = len(data) - 1
+        added += 1
+
+    if added or updated:
         with open(RECIPES_PATH, "w", encoding="utf-8") as f:
             f.write(json.dumps(data, ensure_ascii=False, indent=4))
-    print(f"\n{added} recette(s) ajoutee(s).")
+    print(f"\n{added} recette(s) ajoutee(s), {updated} mise(s) a jour.")
 
 
 if __name__ == "__main__":

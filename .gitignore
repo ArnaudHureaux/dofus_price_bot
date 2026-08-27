@@ -9,7 +9,11 @@ dist
 
 # Generated screenshots (calibration / OCR captures)
 capture_*.png
+img/suspicious/
 
 # Google API secrets - NEVER commit these
 credentials.json
 token.json
+
+# Runtime price cache
+prices_cache.json

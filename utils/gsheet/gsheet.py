@@ -37,6 +37,9 @@ SPREADSHEET_ID = "1VL7916sjzDG5n_yT75eA94y4L9m65YrhpMqEf5FlELI"
 COL_ITEM = "Nom de l'item"
 COL_COST = "Coût"
 COL_DATE = "Date Coût"
+COL_RECIPE = "Recette"
+COL_PRICE = "Prix"
+COL_PRICE_DATE = "Date Prix"
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 CREDENTIALS_PATH = os.path.join(_HERE, "credentials.json")
@@ -142,12 +145,15 @@ def update_item_names(renames: dict[str, str]) -> int:
     return len(updates)
 
 
-def update_costs(costs: dict[str, int]) -> int:
+def update_costs(costs: dict[str, int], recipes: dict[str, str] = None) -> int:
     """
     purpose:
         Write craft costs back into the "Coût" column, matching rows by item name.
+        Optionally also writes a per-cost recipe breakdown into the "Recette"
+        column and a timestamp into the "Date Coût" column.
     input:
-        costs (dict): {item_name: cost}
+        costs (dict)  : {item_name: cost}
+        recipes (dict): {item_name: recipe_string} (optional)
     output:
         int: number of rows updated.
     """
@@ -162,8 +168,9 @@ def update_costs(costs: dict[str, int]) -> int:
             f"Could not find required columns in the sheet header: {header}"
         ) from e
 
-    # Optional "Date" column: written only if present in the sheet header
+    # Optional columns: written only if present in the sheet header
     date_col = header.index(COL_DATE) + 1 if COL_DATE in header else None
+    recipe_col = header.index(COL_RECIPE) + 1 if COL_RECIPE in header else None
     today = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     item_names = ws.col_values(item_col)  # includes header at index 0
@@ -178,6 +185,65 @@ def update_costs(costs: dict[str, int]) -> int:
                 {
                     "range": gspread.utils.rowcol_to_a1(row_idx, cost_col),
                     "values": [[costs[name]]],
+                }
+            )
+            if recipe_col and recipes and name in recipes:
+                updates.append(
+                    {
+                        "range": gspread.utils.rowcol_to_a1(row_idx, recipe_col),
+                        "values": [[recipes[name]]],
+                    }
+                )
+            if date_col:
+                updates.append(
+                    {
+                        "range": gspread.utils.rowcol_to_a1(row_idx, date_col),
+                        "values": [[today]],
+                    }
+                )
+
+    if updates:
+        ws.batch_update(updates)
+
+    return updated
+
+
+def update_prices(prices: dict[str, int]) -> int:
+    """
+    purpose:
+        Write item sell prices into the "Prix" column, matching rows by item
+        name, and a timestamp into the "Date Prix" column.
+    input:
+        prices (dict): {item_name: price}
+    output:
+        int: number of rows updated.
+    """
+    ws = _get_worksheet()
+
+    header = ws.row_values(1)
+    try:
+        item_col = header.index(COL_ITEM) + 1
+        price_col = header.index(COL_PRICE) + 1
+    except ValueError as e:
+        raise ValueError(
+            f"Could not find required columns in the sheet header: {header}"
+        ) from e
+
+    date_col = header.index(COL_PRICE_DATE) + 1 if COL_PRICE_DATE in header else None
+    today = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    item_names = ws.col_values(item_col)  # includes header at index 0
+
+    updates = []
+    updated = 0
+    for row_idx, name in enumerate(item_names[1:], start=2):  # skip header
+        name = (name or "").strip()
+        if name in prices:
+            updated += 1
+            updates.append(
+                {
+                    "range": gspread.utils.rowcol_to_a1(row_idx, price_col),
+                    "values": [[prices[name]]],
                 }
             )
             if date_col:

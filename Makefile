@@ -3,14 +3,17 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help run sync reco pos pick shot clean
+.PHONY: help run res equ conso reco recof pos pick shot clean
 
 # help  : list available commands
 help:
 	@echo "Dofus Price Bot - commands"
-	@echo "  make run    -> launch the bot (GUI + autoclick + OCR)"
-	@echo "  make sync   -> full workflow: read sheet -> price -> write Cout column"
+	@echo "  make run    -> launch the bot (GUI: one button per HDV)"
+	@echo "  make res    -> HDV Ressource: price resources -> write Prix + Cout"
+	@echo "  make equ    -> HDV Equipement: price gear -> write Prix + Cout"
+	@echo "  make conso  -> HDV Consommable: price consumables -> write Prix + Cout"
 	@echo "  make reco   -> fetch missing recipes from the sheet via DofusDB API"
+	@echo "  make recof  -> re-fetch + overwrite existing sheet recipes (fix Touch data)"
 	@echo "  make pos    -> live mouse position finder"
 	@echo "  make pick   -> visual region selector (draw a box -> bbox + OCR)"
 	@echo "  make shot   -> full-screen capture (6s delay) into capture_full.png"
@@ -20,13 +23,25 @@ help:
 run:
 	$(PY) -m dofus_cookbot
 
-# sync  : full workflow (sheet -> HDV prices -> write Cout column)
-sync:
-	$(PY) -m dofus_cookbot --sync
+# res   : HDV Ressource workflow
+res:
+	$(PY) -m dofus_cookbot --resource
+
+# equ   : HDV Equipement workflow
+equ:
+	$(PY) -m dofus_cookbot --equipment
+
+# conso : HDV Consommable workflow
+conso:
+	$(PY) -m dofus_cookbot --consumable
 
 # reco  : fetch missing recipes from the sheet via DofusDB API
 reco:
 	$(PY) utils/api/fetch_recipes.py
+
+# recof : re-fetch AND overwrite existing sheet recipes (fixes wrong Touch data)
+recof:
+	$(PY) utils/api/fetch_recipes.py --refresh
 
 # pos   : live cursor position
 pos:

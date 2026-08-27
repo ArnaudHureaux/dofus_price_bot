@@ -10,7 +10,7 @@ from importlib.resources import files
 
 # Third party imports
 try:
-    from tkinter import ACTIVE, BOTTOM, END 
+    from tkinter import ACTIVE, END
     from tkinter import Label, Listbox, messagebox, Tk, ttk
 except ModuleNotFoundError as e:
     print(f"ModuleNotFoundError: {e}")
@@ -45,7 +45,7 @@ def get_item_names(recipe_file_path: str) -> list[str]:
 
 def create_window():
     item_requested = list()
-    action = {"sync": False}
+    action = {"hdv": None}
     root = Tk()
     root.title("Dofus Cooker")
     root.geometry("600x600")
@@ -53,29 +53,17 @@ def create_window():
     style = ttk.Style(root)
     style.theme_use('clam')
 
-    def on_ok_button_click():
-        if added_items.size() == 0:
-            messagebox.showinfo("No item selected", "Please select at least one item")
-        else:
-            root.destroy()
-
-    def on_sync_button_click():
-        action["sync"] = True
+    def on_sync_resource_click():
+        action["hdv"] = "resource"
         root.destroy()
-    
-    def on_add_button_click():
-        item_requested.append(my_entry.get())
-        added_items.delete(0, END)
-        for item in item_requested:
-            added_items.insert(END, item)
-        return
-    
-    def on_delete_button_click():
-        selected_item = added_items.curselection()
-        if selected_item:
-            added_items.delete(selected_item[0])
-            item_requested.pop(selected_item[0])
-        return
+
+    def on_sync_equipment_click():
+        action["hdv"] = "equipment"
+        root.destroy()
+
+    def on_sync_consumable_click():
+        action["hdv"] = "consumable"
+        root.destroy()
 
     # Update the listbox
     def update(data):
@@ -116,20 +104,14 @@ def create_window():
     global_item_list = Listbox(root, width=50)
     global_item_list.pack(pady=40)
 
-    add_button = ttk.Button(root, text="ADD", command=on_add_button_click)
-    add_button.pack(padx=20)
+    sync_resource_button = ttk.Button(root, text="SYNC HDV RESSOURCE", command=on_sync_resource_click)
+    sync_resource_button.pack(pady=10)
 
-    ok_button = ttk.Button(root, text="OK", command=on_ok_button_click)
-    ok_button.pack(pady=20)
+    sync_equipment_button = ttk.Button(root, text="SYNC HDV \u00c9QUIPEMENT", command=on_sync_equipment_click)
+    sync_equipment_button.pack(pady=10)
 
-    sync_button = ttk.Button(root, text="SYNC SHEET", command=on_sync_button_click)
-    sync_button.pack(padx=20)
-
-    delete_button = ttk.Button(root, text="DELETE", command=on_delete_button_click)
-    delete_button.pack(padx=20, side=BOTTOM)
-
-    added_items = Listbox(root, height=5, width=50)
-    added_items.pack(pady=10, side=BOTTOM)
+    sync_consumable_button = ttk.Button(root, text="SYNC HDV CONSOMMABLE", command=on_sync_consumable_click)
+    sync_consumable_button.pack(pady=10)
 
     recipe_file_path = "equipment_recipes.json"
     items = get_item_names(recipe_file_path)
@@ -148,8 +130,12 @@ def create_window():
 
     root.mainloop()
 
-    if action["sync"]:
-        return "__SYNC__"
+    if action["hdv"] == "resource":
+        return "__SYNC_RESOURCE__"
+    if action["hdv"] == "equipment":
+        return "__SYNC_EQUIPMENT__"
+    if action["hdv"] == "consumable":
+        return "__SYNC_CONSUMABLE__"
     return item_requested
 
 def ending_message():
