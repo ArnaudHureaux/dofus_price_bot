@@ -41,6 +41,7 @@ COL_DATE = "Date Coût"
 COL_RECIPE = "Recette"
 COL_PRICE = "Prix"
 COL_PRICE_DATE = "Date Prix"
+COL_TO_SCRAPE = "To_scrape"
 
 # History tab: one row per (item, day), snapshotting Prix/Coût + derived margin
 HISTORY_TITLE = "Historic"
@@ -85,14 +86,24 @@ def _get_worksheet(client: gspread.Client = None):
 def get_item_names() -> list[str]:
     """
     purpose:
-        Read the list of item names from the "Nom de l'item" column.
+        Read the item names from the "Nom de l'item" column. If the optional
+        "To_scrape" column has at least one non-empty cell, only those flagged
+        rows are returned (handy to test on a subset); otherwise all items.
     output:
         list[str]: non-empty item names, in sheet order.
     """
     ws = _get_worksheet()
     records = ws.get_all_records()  # list of dicts keyed by header row
-    names = [str(r.get(COL_ITEM, "")).strip() for r in records]
-    return [n for n in names if n]
+    use_flag = any(str(r.get(COL_TO_SCRAPE, "")).strip() for r in records)
+    names = []
+    for r in records:
+        name = str(r.get(COL_ITEM, "")).strip()
+        if not name:
+            continue
+        if use_flag and not str(r.get(COL_TO_SCRAPE, "")).strip():
+            continue
+        names.append(name)
+    return names
 
 
 def get_item_names_public() -> list[str]:
