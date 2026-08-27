@@ -3,7 +3,7 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help run res equ conso reco recof pos pick shot clean
+.PHONY: help run res equ conso reco recof dash pos pick shot clean
 
 # help  : list available commands
 help:
@@ -14,6 +14,7 @@ help:
 	@echo "  make conso  -> HDV Consommable: price consumables -> write Prix + Cout"
 	@echo "  make reco   -> fetch missing recipes from the sheet via DofusDB API"
 	@echo "  make recof  -> re-fetch + overwrite existing sheet recipes (fix Touch data)"
+	@echo "  make dash   -> recompute Stats + Dashboard from the Historic tab"
 	@echo "  make pos    -> live mouse position finder"
 	@echo "  make pick   -> visual region selector (draw a box -> bbox + OCR)"
 	@echo "  make shot   -> full-screen capture (6s delay) into capture_full.png"
@@ -42,6 +43,10 @@ reco:
 # recof : re-fetch AND overwrite existing sheet recipes (fixes wrong Touch data)
 recof:
 	$(PY) utils/api/fetch_recipes.py --refresh
+
+# dash  : recompute Stats + Dashboard from the Historic tab (no scraping)
+dash:
+	$(PY) -m dofus_cookbot --dashboard
 
 # pos   : live cursor position
 pos:

@@ -358,6 +358,49 @@ def snapshot_history() -> int:
     return len(updates) + len(appends)
 
 
+def read_history() -> list[dict]:
+    """Read the Historic tab into [{'date','name','prix','cout'}, ...]."""
+    ss = _get_client().open_by_key(SPREADSHEET_ID)
+    try:
+        ws = ss.worksheet(HISTORY_TITLE)
+    except gspread.WorksheetNotFound:
+        return []
+    out = []
+    for r in ws.get_all_records():
+        out.append(
+            {
+                "date": str(r.get("Date", "")).strip(),
+                "name": str(r.get(COL_ITEM, "")).strip(),
+                "prix": _to_num(r.get(COL_PRICE)),
+                "cout": _to_num(r.get(COL_COST)),
+            }
+        )
+    return out
+
+
+def _write_table(title: str, header: list, rows: list) -> None:
+    """Clear a tab and rewrite it with header + rows (blank cells for None)."""
+    ss = _get_client().open_by_key(SPREADSHEET_ID)
+    try:
+        ws = ss.worksheet(title)
+    except gspread.WorksheetNotFound:
+        ws = ss.add_worksheet(title=title, rows=max(100, len(rows) + 10), cols=len(header))
+    body = [["" if c is None else c for c in row] for row in rows]
+    ws.clear()
+    ws.update("A1", [header] + body, value_input_option="USER_ENTERED")
+
+
+def update_dashboard() -> int:
+    """Recompute Stats + Dashboard from the Historic tab. Returns item count."""
+    from dofus_cookbot.analytics import build_tables
+
+    history = read_history()
+    stats_header, stats_rows, dash_header, dash_rows = build_tables(history)
+    _write_table("Stats", stats_header, stats_rows)
+    _write_table("Dashboard", dash_header, dash_rows)
+    return len(dash_rows)
+
+
 if __name__ == "__main__":
     # Quick manual test
     print("Reading item names...")

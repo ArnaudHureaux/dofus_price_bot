@@ -560,6 +560,7 @@ def run_sync_hdv(hdv: str):
         get_item_names,
         snapshot_history,
         update_costs,
+        update_dashboard,
         update_prices,
     )
 
@@ -618,11 +619,20 @@ def run_sync_hdv(hdv: str):
     try:
         n = snapshot_history()
         print(f"{n} ligne(s) d'historique (onglet Historic).")
+        m = update_dashboard()
+        print(f"{m} item(s) recalcules (onglets Stats + Dashboard).")
     except Exception as e:
-        print(f"[historique] non ecrit: {e}")
+        print(f"[historique/dashboard] non ecrit: {e}")
 
 
 def main():
+    # --dashboard: recompute Stats + Dashboard from the Historic tab (no scraping)
+    if "--dashboard" in sys.argv:
+        from utils.gsheet.gsheet import update_dashboard
+        m = update_dashboard()
+        print(f"{m} item(s) recalcules (onglets Stats + Dashboard).")
+        return
+
     # HDV workflows from the CLI (--resource / --equipment / --consumable)
     for flag, hdv in (
         ("--resource", "resource"),
