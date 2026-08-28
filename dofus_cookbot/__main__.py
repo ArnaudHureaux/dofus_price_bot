@@ -649,25 +649,34 @@ TRAVEL = {
 }
 
 
+_HDV_FR = {"equipment": "ÉQUIPEMENT", "resource": "RESSOURCE", "consumable": "CONSOMMABLE"}
+
+
 def _open_hdv(hdv: str) -> bool:
     pos = HDV_OPEN.get(hdv)
     if not pos:
         return False
+    print(f"  [ouverture] HDV {_HDV_FR.get(hdv, hdv)} -> clic {pos}")
     do_click(*pos)
-    sleep(1.5)
+    sleep(1.8)
     return True
 
 
 def _close_hdv() -> None:
+    print("  [fermeture] panneau HDV (Échap)")
     keyboard.press(Key.esc)
     keyboard.release(Key.esc)
-    sleep(0.6)
+    sleep(0.8)
 
 
 def _travel(src: str, dst: str) -> None:
-    for (x, y) in TRAVEL.get((src, dst), []):
+    clicks = TRAVEL.get((src, dst), [])
+    print(f"  [déplacement] {_HDV_FR.get(src, src)} -> {_HDV_FR.get(dst, dst)} "
+          f"({len(clicks)} clic(s))")
+    for i, (x, y) in enumerate(clicks, 1):
+        print(f"    clic map {i}/{len(clicks)} -> ({x}, {y})")
         do_click(x, y)
-        sleep(2.0)  # let the map change/character walk
+        sleep(3.0)  # let the character walk + the map change/load
 
 
 def run_sync_all():
@@ -689,12 +698,16 @@ def run_sync_all():
         )
         return
 
+    print("[SYNC] Démarre DEVANT l'HDV Équipement (panneau fermé).")
+    print("[SYNC] Ordre: ÉQUIPEMENT -> RESSOURCE -> CONSOMMABLE\n")
+
     data = _load_recipes_data()
     items = get_item_names()
     print(f"{len(items)} items read from the sheet.")
     cache = price_cache.load()
 
     for i, hdv in enumerate(order):
+        print(f"\n===== HDV {_HDV_FR.get(hdv, hdv)} =====")
         if not _open_hdv(hdv):
             print(f"[SYNC] impossible d'ouvrir l'HDV {hdv}, abandon.")
             return
@@ -703,6 +716,7 @@ def run_sync_all():
         if i + 1 < len(order):
             _travel(hdv, order[i + 1])
 
+    print("\n===== Écriture Prix / Coût + Historic / Dashboard =====")
     _write_prices(data, items, cache)
     _write_costs(data, items, cache)
     _finalize_history()
