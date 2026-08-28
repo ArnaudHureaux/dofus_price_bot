@@ -545,33 +545,10 @@ def _names_to_price_for_hdv(data: list, items: list, hdv: str) -> dict:
     return needed
 
 
-def run_sync_hdv(hdv: str):
-    """
-    purpose:
-        One-HDV workflow. Standing in front of the given HDV NPC, OCR-price
-        every sheet item and every ingredient of that HDV type, cache the unit
-        prices, write the "Prix" of the sheet items of this HDV, then recompute
-        the "Coût" (+ "Recette") of every sheet item whose ingredients are all
-        priced in the shared cache.
-    input:
-        hdv (str): "resource" | "equipment" | "consumable"
-    """
-    from utils.gsheet.gsheet import (
-        get_item_names,
-        snapshot_history,
-        update_costs,
-        update_dashboard,
-        update_prices,
-    )
-
-    data = _load_recipes_data()
-    items = get_item_names()
-    print(f"{len(items)} items read from the sheet.")
-
-    cache = price_cache.load()
+def _price_needed_into_cache(data: list, items: list, cache: dict, hdv: str) -> None:
+    """Price every needed name for this HDV into the shared cache (panel open)."""
     needed = _names_to_price_for_hdv(data, items, hdv)
     print(f"HDV {hdv}: {len(needed)} item(s) to price.\n")
-
     for name in needed:
         sell, cost, suspicious = price_item(name, hdv)
         if suspicious:
@@ -581,21 +558,29 @@ def run_sync_hdv(hdv: str):
         print(f"  {name}: prix {sell} / cout {cost} Kamas")
     price_cache.save(cache)
 
-    # Write the "Prix" (cheapest per-unit) of the sheet items of this HDV
+
+def _write_prices(data: list, items: list, cache: dict, hdvs: list = None) -> None:
+    """Write the sheet 'Prix' (cheapest per-unit) for items of the given HDVs."""
+    from utils.gsheet.gsheet import update_prices
+
     type_of = _type_index(data)
     prices = {}
     for name in items:
-        if hdv_for_type(type_of.get(name, '')) == hdv:
-            p = price_cache.get_sell(cache, name)
-            if p:
-                prices[name] = p
+        if hdvs and hdv_for_type(type_of.get(name, '')) not in hdvs:
+            continue
+        p = price_cache.get_sell(cache, name)
+        if p:
+            prices[name] = p
     if prices:
         n = update_prices(prices)
         print(f"\n{n} price(s) written to the 'Prix' column.")
 
-    # Recompute the "Coût" (max per-unit ingredients) of any fully priced item
-    costs = {}
-    recipes = {}
+
+def _write_costs(data: list, items: list, cache: dict) -> None:
+    """Recompute + write the 'Coût' (+ Recette) of every fully-priced item."""
+    from utils.gsheet.gsheet import update_costs
+
+    costs, recipes = {}, {}
     for name in items:
         parsed_recipe = parse_recipe_from_json(data, name)
         if not parsed_recipe:
@@ -610,13 +595,16 @@ def run_sync_hdv(hdv: str):
         if complete:
             costs[name] = sum(r['quantity'] * r['unit_cost'] for r in parsed_recipe)
             recipes[name] = format_recipe_detail(parsed_recipe)
-
     if costs:
         n = update_costs(costs, recipes)
         print(f"{n} cost(s) written to the 'Coût' column.")
 
-    # Daily history snapshot (one row per item/day in the 'Historic' tab)
+
+def _finalize_history() -> None:
+    """Daily Historic snapshot + Stats/Dashboard recompute."""
     try:
+        from utils.gsheet.gsheet import snapshot_history, update_dashboard
+
         n = snapshot_history()
         print(f"{n} ligne(s) d'historique (onglet Historic).")
         m = update_dashboard()
@@ -625,12 +613,113 @@ def run_sync_hdv(hdv: str):
         print(f"[historique/dashboard] non ecrit: {e}")
 
 
+def run_sync_hdv(hdv: str):
+    """
+    purpose:
+        One-HDV workflow. Standing in front of the given HDV NPC (panel open),
+        OCR-price the sheet items and ingredients of that HDV, write their
+        "Prix", recompute "Coût", then snapshot history + dashboard.
+    input:
+        hdv (str): "resource" | "equipment" | "consumable"
+    """
+    from utils.gsheet.gsheet import get_item_names
+
+    data = _load_recipes_data()
+    items = get_item_names()
+    print(f"{len(items)} items read from the sheet.")
+
+    cache = price_cache.load()
+    _price_needed_into_cache(data, items, cache, hdv)
+    _write_prices(data, items, cache, hdvs=[hdv])
+    _write_costs(data, items, cache)
+    _finalize_history()
+
+
+# --- SYNC chain calibration (fill from `make pos` / `make shot`) ------------
+# Click to OPEN each HDV buy panel (you must be standing in front of it).
+HDV_OPEN = {
+    "equipment": None,    # (x, y)
+    "resource": None,     # (x, y)
+    "consumable": None,   # (x, y)
+}
+# Map-change clicks to WALK between HDVs, applied in order.
+TRAVEL = {
+    ("equipment", "resource"): [],    # 2 clicks: [(x, y), (x, y)]
+    ("resource", "consumable"): [],   # 3 clicks: [(x, y), (x, y), (x, y)]
+}
+
+
+def _open_hdv(hdv: str) -> bool:
+    pos = HDV_OPEN.get(hdv)
+    if not pos:
+        return False
+    do_click(*pos)
+    sleep(1.5)
+    return True
+
+
+def _close_hdv() -> None:
+    keyboard.press(Key.esc)
+    keyboard.release(Key.esc)
+    sleep(0.6)
+
+
+def _travel(src: str, dst: str) -> None:
+    for (x, y) in TRAVEL.get((src, dst), []):
+        do_click(x, y)
+        sleep(2.0)  # let the map change/character walk
+
+
+def run_sync_all():
+    """
+    purpose:
+        Full chain: open the Equipement HDV -> price -> walk to Ressource HDV
+        -> price -> walk to Consommable HDV -> price, then write Prix/Coût and
+        refresh Historic + Dashboard once.
+    """
+    from utils.gsheet.gsheet import get_item_names
+
+    order = ["equipment", "resource", "consumable"]
+    missing = [h for h in order if not HDV_OPEN.get(h)]
+    if missing:
+        print(
+            "[SYNC] Coordonnees manquantes pour: "
+            + ", ".join(missing)
+            + ". Fais `make pos` et donne-les moi (voir HDV_OPEN / TRAVEL)."
+        )
+        return
+
+    data = _load_recipes_data()
+    items = get_item_names()
+    print(f"{len(items)} items read from the sheet.")
+    cache = price_cache.load()
+
+    for i, hdv in enumerate(order):
+        if not _open_hdv(hdv):
+            print(f"[SYNC] impossible d'ouvrir l'HDV {hdv}, abandon.")
+            return
+        _price_needed_into_cache(data, items, cache, hdv)
+        _close_hdv()
+        if i + 1 < len(order):
+            _travel(hdv, order[i + 1])
+
+    _write_prices(data, items, cache)
+    _write_costs(data, items, cache)
+    _finalize_history()
+
+
 def main():
     # --dashboard: recompute Stats + Dashboard from the Historic tab (no scraping)
     if "--dashboard" in sys.argv:
         from utils.gsheet.gsheet import update_dashboard
         m = update_dashboard()
         print(f"{m} item(s) recalcules (onglets Stats + Dashboard).")
+        return
+
+    # --sync: full chain (equipment -> resource -> consumable) with travel
+    if "--sync" in sys.argv:
+        run_sync_all()
+        ending_message()
         return
 
     # HDV workflows from the CLI (--resource / --equipment / --consumable)
@@ -646,6 +735,12 @@ def main():
 
     # Pop the GUI to select items / HDV
     target_lst = create_window()
+
+    # Full chain button
+    if target_lst == "__SYNC_ALL__":
+        run_sync_all()
+        ending_message()
+        return
 
     # One button per HDV in the GUI
     if target_lst == "__SYNC_RESOURCE__":

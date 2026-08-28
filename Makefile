@@ -3,12 +3,13 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help run res equ conso reco recof dash pos pick shot clean
+.PHONY: help run sync res equ conso reco recof dash pos pick shot clean
 
 # help  : list available commands
 help:
 	@echo "Dofus Price Bot - commands"
 	@echo "  make run    -> launch the bot (GUI: one button per HDV)"
+	@echo "  make sync   -> full chain: equipement -> ressource -> consommable (with travel)"
 	@echo "  make res    -> HDV Ressource: price resources -> write Prix + Cout"
 	@echo "  make equ    -> HDV Equipement: price gear -> write Prix + Cout"
 	@echo "  make conso  -> HDV Consommable: price consumables -> write Prix + Cout"
@@ -23,6 +24,10 @@ help:
 # run   : start the bot
 run:
 	$(PY) -m dofus_cookbot
+
+# sync  : full chain across the 3 HDV with map travel (needs calibrated coords)
+sync:
+	$(PY) -m dofus_cookbot --sync
 
 # res   : HDV Ressource workflow
 res:
