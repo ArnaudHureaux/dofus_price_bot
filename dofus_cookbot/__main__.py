@@ -638,14 +638,14 @@ def run_sync_hdv(hdv: str):
 # --- SYNC chain calibration (fill from `make pos` / `make shot`) ------------
 # Click to OPEN each HDV buy panel (you must be standing in front of it).
 HDV_OPEN = {
-    "equipment": None,    # (x, y)
-    "resource": None,     # (x, y)
-    "consumable": None,   # (x, y)
+    "equipment": (778, 639),
+    "resource": (886, 644),
+    "consumable": (1591, 606),
 }
 # Map-change clicks to WALK between HDVs, applied in order.
 TRAVEL = {
-    ("equipment", "resource"): [],    # 2 clicks: [(x, y), (x, y)]
-    ("resource", "consumable"): [],   # 3 clicks: [(x, y), (x, y), (x, y)]
+    ("equipment", "resource"): [(93, 647), (70, 373)],
+    ("resource", "consumable"): [(1536, 41), (914, 46), (28, 977)],
 }
 
 
