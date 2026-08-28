@@ -630,5 +630,540 @@
                 }
             }
         ]
+    },
+    {
+        "_id": 548,
+        "name": "Potion de Rappel",
+        "type": "Potion de téléportation",
+        "lvl": "10",
+        "recipe": [
+            {
+                "Ortie": {
+                    "id": "421",
+                    "type": "Plante",
+                    "lvl": "1",
+                    "quantity": "5"
+                }
+            },
+            {
+                "Eau Potable": {
+                    "id": "311",
+                    "type": "Liquide",
+                    "lvl": "1",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Éklâme inférieure": {
+                    "id": "31518",
+                    "type": "Éklâme",
+                    "lvl": "1",
+                    "quantity": "2"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 6964,
+        "name": "Potion de cité : Brâkmar",
+        "type": "Potion de téléportation",
+        "lvl": "20",
+        "recipe": [
+            {
+                "Sauge": {
+                    "id": "428",
+                    "type": "Plante",
+                    "lvl": "20",
+                    "quantity": "10"
+                }
+            },
+            {
+                "Truite": {
+                    "id": "1844",
+                    "type": "Poisson",
+                    "lvl": "20",
+                    "quantity": "5"
+                }
+            },
+            {
+                "Eau Potable": {
+                    "id": "311",
+                    "type": "Liquide",
+                    "lvl": "1",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Éklâme inférieure": {
+                    "id": "31518",
+                    "type": "Éklâme",
+                    "lvl": "1",
+                    "quantity": "3"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 6965,
+        "name": "Potion de cité : Bonta",
+        "type": "Potion de téléportation",
+        "lvl": "20",
+        "recipe": [
+            {
+                "Sauge": {
+                    "id": "428",
+                    "type": "Plante",
+                    "lvl": "20",
+                    "quantity": "10"
+                }
+            },
+            {
+                "Orge": {
+                    "id": "400",
+                    "type": "Céréale",
+                    "lvl": "20",
+                    "quantity": "5"
+                }
+            },
+            {
+                "Eau Potable": {
+                    "id": "311",
+                    "type": "Liquide",
+                    "lvl": "1",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Éklâme inférieure": {
+                    "id": "31518",
+                    "type": "Éklâme",
+                    "lvl": "1",
+                    "quantity": "3"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 27635,
+        "name": "Potion de Percepteur",
+        "type": "Potion de conquête",
+        "lvl": "20",
+        "recipe": [
+            {
+                "Pépite": {
+                    "id": "14635",
+                    "type": "Pierre précieuse",
+                    "lvl": "1",
+                    "quantity": "20"
+                }
+            },
+            {
+                "Épine du Champ Champ": {
+                    "id": "377",
+                    "type": "Champignon",
+                    "lvl": "18",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Sourcil de Moskito": {
+                    "id": "371",
+                    "type": "Poil",
+                    "lvl": "13",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Éklâme inférieure": {
+                    "id": "31518",
+                    "type": "Éklâme",
+                    "lvl": "1",
+                    "quantity": "2"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 835,
+        "name": "Baguette de Sagesse",
+        "type": "Baguette",
+        "lvl": "27",
+        "recipe": [
+            {
+                "Serviette de Plage": {
+                    "id": "13487",
+                    "type": "Étoffe",
+                    "lvl": "18",
+                    "quantity": "4"
+                }
+            },
+            {
+                "Noeul Mort": {
+                    "id": "2676",
+                    "type": "Ressource diverse",
+                    "lvl": "22",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Ailes de Moskito": {
+                    "id": "307",
+                    "type": "Aile",
+                    "lvl": "18",
+                    "quantity": "4"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 1487,
+        "name": "L'Adelus",
+        "type": "Ceinture",
+        "lvl": "48",
+        "recipe": [
+            {
+                "Cuir de Ouassingue": {
+                    "id": "887",
+                    "type": "Cuir",
+                    "lvl": "36",
+                    "quantity": "6"
+                }
+            },
+            {
+                "Œuf de Tofu": {
+                    "id": "367",
+                    "type": "Œuf",
+                    "lvl": "36",
+                    "quantity": "5"
+                }
+            },
+            {
+                "Substrat de Bocage": {
+                    "id": "12745",
+                    "type": "Substrat",
+                    "lvl": "40",
+                    "quantity": "2"
+                }
+            },
+            {
+                "Ailes du Scarabosse Doré": {
+                    "id": "8161",
+                    "type": "Aile",
+                    "lvl": "40",
+                    "quantity": "4"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 2442,
+        "name": "Boufbottes Royales",
+        "type": "Bottes",
+        "lvl": "30",
+        "recipe": [
+            {
+                "Laine du Chef de Guerre Bouftou": {
+                    "id": "882",
+                    "type": "Laine",
+                    "lvl": "29",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Cuir de Bouftou Royal": {
+                    "id": "886",
+                    "type": "Cuir",
+                    "lvl": "30",
+                    "quantity": "2"
+                }
+            },
+            {
+                "Laine de Bouftou Royal": {
+                    "id": "880",
+                    "type": "Laine",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 6926,
+        "name": "Coiffe du Prespic",
+        "type": "Chapeau",
+        "lvl": "36",
+        "recipe": [
+            {
+                "Pic de Prespic": {
+                    "id": "407",
+                    "type": "Os",
+                    "lvl": "26",
+                    "quantity": "5"
+                }
+            },
+            {
+                "Cuir de Bouftou Royal": {
+                    "id": "886",
+                    "type": "Cuir",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Poils de Darit": {
+                    "id": "1672",
+                    "type": "Poil",
+                    "lvl": "26",
+                    "quantity": "1"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 6927,
+        "name": "Cape du Prespic",
+        "type": "Cape",
+        "lvl": "37",
+        "recipe": [
+            {
+                "Pic de Prespic": {
+                    "id": "407",
+                    "type": "Os",
+                    "lvl": "26",
+                    "quantity": "5"
+                }
+            },
+            {
+                "Cuir de Bouftou Royal": {
+                    "id": "886",
+                    "type": "Cuir",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Ébonite": {
+                    "id": "746",
+                    "type": "Alliage",
+                    "lvl": "40",
+                    "quantity": "1"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 6928,
+        "name": "Anneau du Prespic",
+        "type": "Anneau",
+        "lvl": "38",
+        "recipe": [
+            {
+                "Pic de Prespic": {
+                    "id": "407",
+                    "type": "Os",
+                    "lvl": "26",
+                    "quantity": "5"
+                }
+            },
+            {
+                "Substrat de Bocage": {
+                    "id": "12745",
+                    "type": "Substrat",
+                    "lvl": "40",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Cuir de Bouftou Royal": {
+                    "id": "886",
+                    "type": "Cuir",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 6929,
+        "name": "Ceinture du Prespic",
+        "type": "Ceinture",
+        "lvl": "33",
+        "recipe": [
+            {
+                "Pic de Prespic": {
+                    "id": "407",
+                    "type": "Os",
+                    "lvl": "26",
+                    "quantity": "6"
+                }
+            },
+            {
+                "Substrat de Bocage": {
+                    "id": "12745",
+                    "type": "Substrat",
+                    "lvl": "40",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Cuir de Bouftou Royal": {
+                    "id": "886",
+                    "type": "Cuir",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 30681,
+        "name": "Bouclier hérissé du Prespic",
+        "type": "Bouclier",
+        "lvl": "35",
+        "recipe": [
+            {
+                "Pic de Prespic": {
+                    "id": "407",
+                    "type": "Os",
+                    "lvl": "26",
+                    "quantity": "4"
+                }
+            },
+            {
+                "Substrat de Bocage": {
+                    "id": "12745",
+                    "type": "Substrat",
+                    "lvl": "40",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Étoffe du Sanglier": {
+                    "id": "652",
+                    "type": "Étoffe",
+                    "lvl": "24",
+                    "quantity": "2"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 7071,
+        "name": "Bouclier du Bûcheron fendu",
+        "type": "Bouclier d'apparat",
+        "lvl": "1",
+        "recipe": []
+    },
+    {
+        "_id": 18714,
+        "name": "Bouclier du tournesol sauvage",
+        "type": "Bouclier",
+        "lvl": "5",
+        "recipe": [
+            {
+                "Planche Agglomérée": {
+                    "id": "16489",
+                    "type": "Planche",
+                    "lvl": "1",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Pétale Diaphane": {
+                    "id": "16513",
+                    "type": "Fleur",
+                    "lvl": "2",
+                    "quantity": "2"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 18666,
+        "name": "Bouclier du Bouftou",
+        "type": "Bouclier",
+        "lvl": "20",
+        "recipe": [
+            {
+                "Laine de Bouftou": {
+                    "id": "384",
+                    "type": "Laine",
+                    "lvl": "19",
+                    "quantity": "3"
+                }
+            },
+            {
+                "Laine de Boufton Noir": {
+                    "id": "885",
+                    "type": "Laine",
+                    "lvl": "26",
+                    "quantity": "3"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 30687,
+        "name": "Cuirasse Royale du Bouftou",
+        "type": "Bouclier",
+        "lvl": "30",
+        "recipe": [
+            {
+                "Laine de Bouftou Royal": {
+                    "id": "880",
+                    "type": "Laine",
+                    "lvl": "30",
+                    "quantity": "1"
+                }
+            },
+            {
+                "Cuir de Bouftou Royal": {
+                    "id": "886",
+                    "type": "Cuir",
+                    "lvl": "30",
+                    "quantity": "2"
+                }
+            },
+            {
+                "Sang de Bouftou": {
+                    "id": "2455",
+                    "type": "Liquide",
+                    "lvl": "19",
+                    "quantity": "2"
+                }
+            }
+        ]
+    },
+    {
+        "_id": 1489,
+        "name": "La Broche Hète",
+        "type": "Amulette",
+        "lvl": "28",
+        "recipe": [
+            {
+                "Plume de Piou Rose": {
+                    "id": "6903",
+                    "type": "Plume",
+                    "lvl": "14",
+                    "quantity": "4"
+                }
+            },
+            {
+                "Substrat de Buisson": {
+                    "id": "2539",
+                    "type": "Substrat",
+                    "lvl": "20",
+                    "quantity": "2"
+                }
+            },
+            {
+                "Épine du Champ Champ": {
+                    "id": "377",
+                    "type": "Champignon",
+                    "lvl": "18",
+                    "quantity": "4"
+                }
+            }
+        ]
     }
 ]

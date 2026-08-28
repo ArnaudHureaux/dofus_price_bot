@@ -265,6 +265,24 @@ def _save_suspicious_image(panel: Image.Image, item_name: str, prices: dict) -> 
         print(f"      could not save suspicious image: {e}")
 
 
+# HDV search results: click the Nth result row. Row 1 is at RESULT_Y1, each
+# next row is RESULT_STEP px lower (measured: Ailes en bois pos2=536,
+# Casque pos6=875 -> ~85 px/row). Add items here whose correct match is not
+# the first result (name -> 1-based position).
+RESULT_X = 1225
+RESULT_Y1 = 451
+RESULT_STEP = 85
+RESULT_POSITION = {
+    "Casque": 6,
+    "Ailes en bois": 2,
+}
+
+
+def _result_click_y(item_name: str) -> int:
+    pos = RESULT_POSITION.get(item_name, 1)
+    return RESULT_Y1 + (pos - 1) * RESULT_STEP
+
+
 def _open_listing(item_name: str) -> Image.Image:
     """Clear the HDV search, type the item name, open its listing panel and
     return a screenshot of the Lot/Prix panel."""
@@ -274,7 +292,7 @@ def _open_listing(item_name: str) -> Image.Image:
     sleep(0.2)
     keyboard.type(item_name)
     sleep(0.7)
-    do_click(1225, 451)  # first result -> unwrap listings
+    do_click(RESULT_X, _result_click_y(item_name))  # Nth result -> unwrap listings
     sleep(1)
     # region = (left, top, width, height), calibrated with region_selector.py
     return pyautogui.screenshot(region=(111, 259, 616 - 111, 627 - 259))
@@ -647,6 +665,8 @@ TRAVEL = {
     ("equipment", "resource"): [(93, 647), (70, 373)],
     ("resource", "consumable"): [(1536, 41), (914, 46), (28, 977)],
 }
+# Optional (x, y) of the HDV panel close cross, used if Échap doesn't close it.
+HDV_CLOSE = None
 
 
 _HDV_FR = {"equipment": "ÉQUIPEMENT", "resource": "RESSOURCE", "consumable": "CONSOMMABLE"}
@@ -662,11 +682,26 @@ def _open_hdv(hdv: str) -> bool:
     return True
 
 
-def _close_hdv() -> None:
-    print("  [fermeture] panneau HDV (Échap)")
+def _press_esc() -> None:
+    # Hold ~0.2s so the game registers the key (instant press+release is missed)
     keyboard.press(Key.esc)
+    sleep(0.2)
     keyboard.release(Key.esc)
-    sleep(0.8)
+
+
+def _close_hdv() -> None:
+    # A close 'X' click is deterministic; Escape needs a real hold to register.
+    if HDV_CLOSE:
+        print(f"  [fermeture] clic croix {HDV_CLOSE}")
+        do_click(*HDV_CLOSE)
+        sleep(1.0)
+        return
+    # 1st Échap unfocuses the search field, 2nd closes the HDV panel
+    print("  [fermeture] panneau HDV (Échap x2)")
+    _press_esc()
+    sleep(0.3)
+    _press_esc()
+    sleep(1.0)
 
 
 def _travel(src: str, dst: str) -> None:
@@ -676,7 +711,7 @@ def _travel(src: str, dst: str) -> None:
     for i, (x, y) in enumerate(clicks, 1):
         print(f"    clic map {i}/{len(clicks)} -> ({x}, {y})")
         do_click(x, y)
-        sleep(3.0)  # let the character walk + the map change/load
+        sleep(5.0)  # character can take up to ~5s to walk + change map
 
 
 def run_sync_all():

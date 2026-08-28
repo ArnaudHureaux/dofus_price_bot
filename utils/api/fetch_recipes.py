@@ -126,37 +126,36 @@ def resolve_items(ids: list[int]) -> dict[int, dict]:
 
 
 def build_entry(name: str) -> dict | None:
-    """Build a full equipment_recipes.json entry for a given item name."""
+    """Build an equipment_recipes.json entry. Records the item type even when
+    the item has no recipe (so HDV routing works for non-craftable items)."""
     item = find_item(name)
     if not item:
         print(f"  [X] item introuvable: {name}")
         return None
 
     item_id = item["id"]
-    recipe = get_recipe(item_id)
-    if not recipe:
-        print(f"  [X] pas de recette: {name} (id {item_id})")
-        return None
-
-    ing = resolve_items(recipe["ingredientIds"])
-    recipe_list = []
-    for iid, qty in zip(recipe["ingredientIds"], recipe["quantities"]):
-        info = ing.get(iid, {"name": str(iid), "level": 0, "type": ""})
-        recipe_list.append(
-            {
-                info["name"]: {
-                    "id": str(iid),
-                    "type": info.get("type", ""),
-                    "lvl": str(info["level"]),
-                    "quantity": str(qty),
-                }
-            }
-        )
 
     type_name = ""
     t = item.get("type")
-    if isinstance(t, dict):
-        type_name = t.get("name", {}).get("fr", "") if isinstance(t.get("name"), dict) else ""
+    if isinstance(t, dict) and isinstance(t.get("name"), dict):
+        type_name = t["name"].get("fr", "")
+
+    recipe = get_recipe(item_id)
+    recipe_list = []
+    if recipe:
+        ing = resolve_items(recipe["ingredientIds"])
+        for iid, qty in zip(recipe["ingredientIds"], recipe["quantities"]):
+            info = ing.get(iid, {"name": str(iid), "level": 0, "type": ""})
+            recipe_list.append(
+                {
+                    info["name"]: {
+                        "id": str(iid),
+                        "type": info.get("type", ""),
+                        "lvl": str(info["level"]),
+                        "quantity": str(qty),
+                    }
+                }
+            )
 
     entry = {
         "_id": item_id,
@@ -165,7 +164,10 @@ def build_entry(name: str) -> dict | None:
         "lvl": str(item.get("level", "")),
         "recipe": recipe_list,
     }
-    print(f"  [OK] {entry['name']} (id {item_id}) - {len(recipe_list)} ingredients")
+    if recipe_list:
+        print(f"  [OK] {entry['name']} (id {item_id}) - {len(recipe_list)} ingredients")
+    else:
+        print(f"  [i] {entry['name']} (id {item_id}) - pas de recette, type '{type_name}' enregistre")
     return entry
 
 
